@@ -1,7 +1,7 @@
 import { useFonts } from 'expo-font';
 import { Slot, SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
-import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
+import { ClerkProvider, SignedIn, useAuth } from '@clerk/clerk-expo';
 import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
@@ -33,11 +33,46 @@ const InitialLayout = () => {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  const { isLoaded, isSignedIn } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
 
+  const router = useRouter();
+  const {isLoaded, isSignedIn} = useAuth();
+  const segments = useSegments();
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  useEffect(
+    ()=>{
+      if(error) throw error;
+    }, [error]
+  );
+  useEffect(
+    ()=>{
+      if(loaded) {
+        SplashScreen.hideAsync();
+      }
+    }, [loaded]
+  );
+
+  useEffect(()=>{
+    if(!isLoaded)return;
+    const inAuthGroup = segments[0] === '(auth)';
+    console.log('~ useEffect ~ inAuthGroup:', inAuthGroup);
+    console.log('~ useEffect ~ isSignedIn:', isSignedIn);
+    if(isSignedIn && !inAuthGroup){
+      //Bring the user Inside
+      router.replace('/(auth)/');
+    }else if(!isSignedIn && !inAuthGroup){
+      //Kick the user out
+      router.replace('/');
+    }
+  }, [isSignedIn])
+
+  if(!loaded || !isLoaded){
+    return (
+    <View style={{flex: 1}}>
+      <ActivityIndicator size="large" color="#000"/>
+    </View>
+    );
+  }
+
   
   return (
     <Stack>
@@ -62,6 +97,7 @@ const InitialLayout = () => {
           ),
         }}
       />
+      <Stack.Screen name="(auth)" options={{headerShown: false}} />
     </Stack>
   );
 };

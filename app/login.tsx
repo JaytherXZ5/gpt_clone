@@ -4,21 +4,60 @@ import { useLocalSearchParams } from 'expo-router';
 import { defaultStyles } from '../constants/Styles';
 import { TextInput } from 'react-native';
 import Colors from '@/constants/Colors';
+import { useSignIn, useSignUp } from '@clerk/clerk-expo';
 
 const Page = () => {
   const { type } = useLocalSearchParams<{ type: string}>();
-  const [emailAddress, setEmailAddress] = useState('');
+  const [emailAddress, setEmailAddress] = useState('jayther@gpt.dev');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   //console.log('~ Page ~ type:',type);
 
-  const onSignUpPress = async() =>{};
-  const onLoginPress = async() => {};
+  const {signIn, isLoaded, setActive } = useSignIn();
+  const {signUp, isLoaded: signUpLoaded , setActive: signupSetActive} = useSignUp();
+
+  const onSignUpPress = async() =>{
+    if (!signUpLoaded) return;
+    setLoading(true);
+
+    try {
+      const result = await signUp.create({emailAddress, password});
+      console.log(" ~ onSignUpPress ~ result:", result)
+
+      signupSetActive({
+        session: result.createdSessionId
+      })
+    } catch (error: any) {
+      console.log("~ onSingUpPress ~ error:", error)
+      alert(error.errors[0].message);
+    }finally{
+      setLoading(false);
+    }
+  };
+  const onLoginPress = async() => {
+    if (!isLoaded) return;
+    setLoading(true);
+
+    try {
+      const result = await signIn.create({identifier: emailAddress, password});
+      console.log(" ~ onSignUpPress ~ result:", result)
+
+      setActive({
+        session: result.createdSessionId
+      })
+    } catch (error: any) {
+      console.log("~ onSingInPress ~ error:", error)
+      alert(error.errors[0].message);
+    }finally{
+      setLoading(false);
+    }
+  };
+
 
   
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS == 'ios' ? 'padding': 'height'}
+    <KeyboardAvoidingView behavior={Platform.OS == 'android' ? 'padding': 'height'}
       keyboardVerticalOffset={1} 
       style={styles.container}>
         {loading && (<View style={defaultStyles.loadingOverlay}>
@@ -67,6 +106,7 @@ const Page = () => {
     </KeyboardAvoidingView>
   )
 };
+
 
 const styles = StyleSheet.create({
   container: {
