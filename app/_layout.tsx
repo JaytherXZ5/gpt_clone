@@ -1,11 +1,12 @@
 import { useFonts } from 'expo-font';
 import { Slot, SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ClerkProvider, SignedIn, useAuth } from '@clerk/clerk-expo';
 import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Page from './index';
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 // Cache the Clerk JWT
@@ -34,8 +35,10 @@ const InitialLayout = () => {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
+  const [signout, issignout] = useState(false);
+
   const router = useRouter();
-  const {isLoaded, isSignedIn} = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const segments = useSegments();
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(
@@ -57,20 +60,22 @@ const InitialLayout = () => {
     console.log('~ useEffect ~ inAuthGroup:', inAuthGroup);
     console.log('~ useEffect ~ isSignedIn:', isSignedIn);
     if(isSignedIn && !inAuthGroup){
-      //Bring the user Inside
-      router.replace('/(auth)/');
-    }else if(!isSignedIn && !inAuthGroup){
+      //Bring the user Insided
+      router.replace("/(auth)/(drawer)/(chat)/new");
+
+    }else if(!isSignedIn){
       //Kick the user out
-      router.replace('/');
+      router.push('/')
     }
-  }, [isSignedIn])
+  }, [isSignedIn] );
+
 
   if(!loaded || !isLoaded){
     return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
       <ActivityIndicator size="large" color="#000"/>
     </View>
-    );
+    )
   }
 
   

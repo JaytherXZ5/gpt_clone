@@ -8,7 +8,7 @@ const Page = () => {
 
   return (
     <View>
-      <Button title = 'Sign out' onPress={()=>signOut()}/>
+      <Button title='Sign out' onPress={()=>signOut()}/>
     </View>
   )
 }

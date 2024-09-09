@@ -9,12 +9,12 @@ import { useSignIn, useSignUp } from '@clerk/clerk-expo';
 const Page = () => {
   const { type } = useLocalSearchParams<{ type: string}>();
   const [emailAddress, setEmailAddress] = useState('jayther@gpt.dev');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('janungpugi4.2');
   const [loading, setLoading] = useState(false);
   //console.log('~ Page ~ type:',type);
 
   const {signIn, isLoaded, setActive } = useSignIn();
-  const {signUp, isLoaded: signUpLoaded , setActive: signupSetActive} = useSignUp();
+  const {signUp, isLoaded: signUpLoaded , setActive: signUpSetActive} = useSignUp();
 
   const onSignUpPress = async() =>{
     if (!signUpLoaded) return;
@@ -24,7 +24,7 @@ const Page = () => {
       const result = await signUp.create({emailAddress, password});
       console.log(" ~ onSignUpPress ~ result:", result)
 
-      signupSetActive({
+      signUpSetActive({
         session: result.createdSessionId
       })
     } catch (error: any) {
